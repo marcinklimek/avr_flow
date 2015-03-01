@@ -144,17 +144,11 @@ void loop()
 {
     unsigned long current_millis = millis();
     
-    boolean need_endl = false;
-
+    boolean debug_output_to_console = false;
     int16_t current_tokens = calculate_tokens();
-
-    if ( current_tokens > 0 && (current_millis - previous_millis_inactivity) > inactivity_timeout )
-    {
-        previous_millis_inactivity = current_millis;
-        stop();
-    }        
-
-    if(current_millis - previous_millis_console > 1000)
+    
+    // -- DEBUG --------------------------------------------------------------------
+    if(current_millis - previous_millis_console >= 1000)
     {
         previous_millis_console = current_millis;
         
@@ -166,12 +160,17 @@ void loop()
         
         Serial.print( "Flow " ); Serial.print( flow_pulses ); Serial.print( " " );
 
-        need_endl = true;
+        debug_output_to_console = true;
     }
     
-    // ----------------------------------------------------------------------
+    // -- CODE --------------------------------------------------------------------
+    if ( current_tokens > 0 && (current_millis - previous_millis_inactivity) >= inactivity_timeout )
+    {
+        previous_millis_inactivity = current_millis;
+        stop();
+    }
     
-    if( (led_blink_interval > 0) && (current_millis - previous_millis_led) > led_blink_interval) 
+    if( (led_blink_interval > 0) && (current_millis - previous_millis_led) >= led_blink_interval) 
     {
         previous_millis_led = current_millis;
         
@@ -185,8 +184,6 @@ void loop()
     
     if (current_millis - previous_millis_tokens > 100)
     {
-        
-        
         if ( current_tokens > 0 )
         {
             int16_t tokens_diff = current_tokens - (int16_t)flow_pulses;
@@ -201,14 +198,14 @@ void loop()
             else
                 stop();
             
-            if ( need_endl  )
+            if ( debug_output_to_console  )
             {
                Serial.print( "tokens " ); Serial.print( current_tokens ); Serial.print( " " ); Serial.print(current_tokens - (int16_t)flow_pulses);
             }               
         }
     }
     
-    if ( need_endl )
+    if ( debug_output_to_console )
         Serial.print( "\n" );   
   
 }
