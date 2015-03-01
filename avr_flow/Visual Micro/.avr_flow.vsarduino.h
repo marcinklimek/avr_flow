@@ -16,10 +16,12 @@
 #define __AVR__
 extern "C" void __cxa_pure_virtual() {;}
 
+void start();
+void stop();
 void callback_flowPin();
 void callback_coinPin();
 void callback_stopPin();
-void restart();
+uint16_t calculate_tokens();
 void setup_callback(uint8_t pin, voidFuncPtr callback_ptr);
 //
 //
