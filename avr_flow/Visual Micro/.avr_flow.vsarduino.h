@@ -16,13 +16,11 @@
 #define __AVR__
 extern "C" void __cxa_pure_virtual() {;}
 
-void checkFlowPin();
-void flowPinChange();
-void quicfunc();
-void checkCoinPin(uint8_t pin);
-void checkStopPin();
-void useInterrupt(boolean state);
+void callback_flowPin();
+void callback_coinPin();
+void callback_stopPin();
 void restart();
+void setup_callback(uint8_t pin, voidFuncPtr callback_ptr);
 //
 //
 

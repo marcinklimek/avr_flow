@@ -2,129 +2,76 @@
 #include <EEPROM.h>
 
 #define FLOW_SENSOR_PIN 2
+
 #define COIN_1_PIN 3
 #define COIN_2_PIN 4
 #define COIN_3_PIN 5
+#define MAX_PINS  20 //max  pins
 #define STOP_PIN   6
 
-volatile uint16_t pulses = 0; // count how many pulses!
-volatile uint8_t lastFlowPinState; // track the state of the pulse pin
-volatile uint32_t lastFlowRateTimer = 0; // you can try to keep time of how long it is between pulses
-volatile float flowrate; // and use that to calculate a flow rate
+typedef void (*voidFuncPtr)(void);
 
-struct coinState
-{
-    volatile uint8_t lastPinState; // track the state of the pulse pin
-    volatile uint16_t pulses = 0; // count how many pulses!
-};
+volatile uint8_t  stop_flag = 0;
+volatile uint16_t flow_pulses = 0;
+volatile uint8_t  interrupt_count[MAX_PINS]={0};  
 
-void checkFlowPin()
+void callback_flowPin()
 {
-    uint8_t flowPinState = digitalRead(FLOW_SENSOR_PIN);
-    
-    if (flowPinState == lastFlowPinState) {
-        lastFlowRateTimer++;
-        return; // nothing changed!
-    }
-    
-    if (flowPinState == HIGH) {
-        //low to high transition!p
-        pulses++;
-    }
-    lastFlowPinState = flowPinState;
-    
-    flowrate = 1000.0;
-    flowrate /= lastFlowRateTimer;  // in hertz
-    
-    lastFlowRateTimer = 0;
+    flow_pulses++;
 }
 
-uint8_t latest_interrupted_pin;
-uint8_t interrupt_count[20]={0}; // 20 possible arduino pins
-
-void flowPinChange()
+void callback_coinPin()
 {
-}    
-      
-void quicfunc() {
-    latest_interrupted_pin=PCintPort::arduinoPin;
+    uint8_t latest_interrupted_pin = PCintPort::arduinoPin;
     interrupt_count[latest_interrupted_pin]++;
-};
-
-void checkCoinPin(uint8_t pin)
-{
 }
 
-void checkStopPin()
+void callback_stopPin()
 {
-    
+    stop_flag = 1;
 }
-
-SIGNAL(TIMER0_COMPA_vect)
-{
-    checkFlowPin();
-    checkCoinPin(COIN_1_PIN);
-
-    checkStopPin();
-}
-
-void useInterrupt(boolean state)
-{
-    if (state)
-    {
-        // Timer0 is already used for millis() - we'll just interrupt somewhere
-        // in the middle and call the "Compare A" function above
-        OCR0A = 0xAF;
-        TIMSK0 |= _BV(OCIE0A);
-    }
-    else
-    {
-        // do not call the interrupt function COMPA anymore
-        TIMSK0 &= ~_BV(OCIE0A);
-    }
-}
-
 
 void restart()
 {
-    lastFlowPinState = digitalRead(FLOW_SENSOR_PIN);
+    stop_flag = 0;
+    flow_pulses = 0;
+
+    for(uint8_t i=0; i<MAX_PINS; i++)
+        interrupt_count[i] = 0;
 }
+
+
+void setup_callback(uint8_t pin, voidFuncPtr callback_ptr)
+{
+    PCintPort::attachInterrupt(pin, callback_ptr, FALLING);
+    pinMode(pin, INPUT);
+    digitalWrite(pin, HIGH);  // pullup 
+}
+
 
 void setup() {
     Serial.begin(9600);
     Serial.print("Dystrybutor");
-    
-    pinMode(FLOW_SENSOR_PIN, INPUT);
-    digitalWrite(FLOW_SENSOR_PIN, HIGH);  // pullup
-    
-    pinMode(COIN_1_PIN, INPUT);
-    pinMode(COIN_2_PIN, INPUT);
-    pinMode(COIN_3_PIN, INPUT);
-    digitalWrite(COIN_1_PIN, HIGH);  // pullup
-    digitalWrite(COIN_2_PIN, HIGH);  // pullup    
-    digitalWrite(COIN_3_PIN, HIGH);  // pullup
 
-    pinMode(STOP_PIN, INPUT);
-    digitalWrite(STOP_PIN, HIGH);  // pullup
+    setup_callback(FLOW_SENSOR_PIN, &callback_flowPin);
+    setup_callback(COIN_1_PIN, &callback_coinPin);
+    setup_callback(COIN_1_PIN, &callback_coinPin);
+    setup_callback(COIN_1_PIN, &callback_coinPin);
+    setup_callback(STOP_PIN, &callback_stopPin);
     
-    useInterrupt(true);
+    restart();
 }
 
 void loop()
 {
-    Serial.print("Freq: "); Serial.println(flowrate);
-    Serial.print("Pulses: "); Serial.println(pulses, DEC);
+    Serial.print( "Stop " ); Serial.print( stop_flag ); Serial.print( " " );
     
-    // if a plastic sensor use the following calculation
-    // Sensor Frequency (Hz) = 7.5 * Q (Liters/min)
-    // Liters = Q * time elapsed (seconds) / 60 (seconds/minute)
-    // Liters = (Frequency (Pulses/second) / 7.5) * time elapsed (seconds) / 60
-    // Liters = Pulses / (7.5 * 60)
+    Serial.print( "C1 " ); Serial.print( interrupt_count[COIN_1_PIN] ); Serial.print( " " );
+    Serial.print( "C2 " ); Serial.print( interrupt_count[COIN_2_PIN] ); Serial.print( " " );
+    Serial.print( "C5 " ); Serial.print( interrupt_count[COIN_3_PIN] ); Serial.print( " " );
     
-    float liters = pulses;
-    liters /= 7.5;
-    liters /= 60.0;
-
-    Serial.print(liters); Serial.println(" Liters");
-    delay(200);
+    Serial.print( "Flow " ); Serial.print( flow_pulses ); Serial.print( " " );
+    Serial.print( "\n" );
+    
+    delay(1000);
 }
