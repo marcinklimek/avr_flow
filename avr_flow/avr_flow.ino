@@ -146,7 +146,9 @@ void loop()
     
     boolean need_endl = false;
 
-    if ( current_millis - previous_millis_inactivity > inactivity_timeout )
+    int16_t current_tokens = calculate_tokens();
+
+    if ( current_tokens > 0 && (current_millis - previous_millis_inactivity) > inactivity_timeout )
     {
         previous_millis_inactivity = current_millis;
         stop();
@@ -183,7 +185,7 @@ void loop()
     
     if (current_millis - previous_millis_tokens > 100)
     {
-        int16_t current_tokens = calculate_tokens();
+        
         
         if ( current_tokens > 0 )
         {
