@@ -25,7 +25,10 @@
 #define LATCH_PIN 10
 #define CLOCK_PIN 12
 
-#define DOT 0b01111111
+// works properly only on PORTB
+#define clockPinPORTB (CLOCK_PIN-8)
+#define dataPinPORTB  (DATA_PIN-8)
+#define latchPinPORTB  (LATCH_PIN-8)
 
 const byte dec_digits[] = { 0b11000000, 0b11111001, 0b10100100, 0b10110000, 0b10011001, 0b10010010, 0b10000010, 0b11111000, 0b10000000, 0b10011000, 0b10111111 };
 const byte segments[] =   { 0b00001000, 0b00000100, 0b00000010, 0b00000001 };
@@ -96,10 +99,74 @@ void set_segment_data(void* d, unsigned int val)
     digit[0].value = val;
 }
 
+//--- shiftOutFast - Shiftout method done in a faster way .. needed for tighter timer process
+void shiftOutFast(int myDataPin, int myClockPin, byte myDataOut) {
+    //=== This function shifts 8 bits out MSB first much faster than the normal shiftOut function by writing directly to the memory address for port
+    //--- clear data pin
+    dataOff();
+
+    //Send each bit of the myDataOut byte MSBFIRST
+    for (int i=7; i>=0; i--)  {
+        clockOff();
+        //--- Turn data on or off based on value of bit
+        if ( bitRead(myDataOut,i) == 1) {
+            dataOn();
+        }
+        else {
+            dataOff();
+        }
+        //register shifts bits on upstroke of clock pin
+        clockOn();
+        //zero the data pin after shift to prevent bleed through
+        dataOff();
+    }
+    //stop shifting
+    digitalWrite(myClockPin, 0);
+}
+
+void dataOff(){
+    bitClear(PORTB,dataPinPORTB);
+}
+
+void clockOff(){
+    bitClear(PORTB,clockPinPORTB);
+}
+
+void clockOn(){
+    bitSet(PORTB,clockPinPORTB);
+}
+
+void dataOn(){
+    bitSet(PORTB,dataPinPORTB);
+}
+
+void latchOn(){
+    bitSet(PORTB,latchPinPORTB);
+}
+
+void latchOff(){
+    bitClear(PORTB,latchPinPORTB);
+}
+
    
 void draw_led()
 {
-    //noInterrupts();
+    latchOff();
+    
+    uint8_t value = dec_digits[ segment_data[segment].value ];
+    shiftOutFast(DATA_PIN, CLOCK_PIN, value /*& segment_data[segment].dot*/ );
+    shiftOutFast(DATA_PIN, CLOCK_PIN, segments[segment]);
+
+    latchOn();
+
+    
+    segment++;
+    if ( segment == 4 )
+        segment = 0;
+}
+
+void old_draw_led()
+{
     digitalWrite(LATCH_PIN, LOW);
     uint8_t value = dec_digits[ segment_data[segment].value ];
     shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, value /*& segment_data[segment].dot*/ );
@@ -109,10 +176,9 @@ void draw_led()
     
     segment++;
     if ( segment == 4 )
-        segment = 0;
-        
-    //interrupts();
+    segment = 0;
 }
+
 
 void start()
 {
@@ -243,7 +309,7 @@ void setup()
     
     stop();
     
-    Timer1.initialize(13333);
+    Timer1.initialize(150000/4);
     Timer1.attachInterrupt( draw_led ); 
 }
 
