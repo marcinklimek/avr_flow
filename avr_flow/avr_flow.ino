@@ -1,5 +1,10 @@
 #include <PinChangeInt.h>
 #include "TimerOne/TimerOne.h"
+#include <Button.h>
+#define PULLUP true         //To keep things simple, we use the Arduino's internal pullup resistor.
+#define INVERT true         //Since the pullup resistor will keep the pin high unless the
+                            //switch is closed, this is negative logic, i.e. a high state
+                            //means the button is NOT pressed. (Assuming a normally open switch.)
 
 #define FLOW_SENSOR_PIN 5
 
@@ -31,6 +36,8 @@
 #define latchPinPORTB  (LATCH_PIN-8)
 
 const byte dec_digits[] = { 0b11000000, 0b11111001, 0b10100100, 0b10110000, 0b10011001, 0b10010010, 0b10000010, 0b11111000, 0b10000000, 0b10011000, 0b10111111 };
+// 0 - P
+const byte symbols[] = {0b10001100};    
 const byte segments[] =   { 0b00001000, 0b00000100, 0b00000010, 0b00000001 };
 
 typedef void (*voidFuncPtr)(void);
@@ -56,67 +63,70 @@ unsigned long previous_millis_flow = 0;
 // 2 min
 #define inactivity_timeout 120
 
+/* MENU */
+#define LONG_PRESS 1000
+#define MENU_ENTER_PIN 16
+#define MENU_UP_PIN 14
+#define MENU_DOWN_PIN 15
 uint8_t segment = 0;
+
+enum {MENU_WAIT = 0, MENU_SET_TOKENS, MENU_SAVE};  
+    
+volatile uint8_t menu_state = MENU_WAIT;
+
+Button btn_enter(MENU_ENTER_PIN, PULLUP, INVERT, 20);
+Button btn_up(MENU_UP_PIN, PULLUP, INVERT, 20);
+Button btn_down(MENU_DOWN_PIN, PULLUP, INVERT, 20);
+
+#define REPEAT_FIRST 500   //ms required before repeating on long press
+#define REPEAT_INCR  100   //repeat interval for long press
+#define MIN_COUNT      1
+#define MAX_COUNT    300
+
+enum {BUTTON_UP_DOWN_WAIT, BUTTON_UP_DOWN_INCR, BUTTON_UP_DOWN_DECR};
+    
+uint8_t up_dn_state;                  //The current state machine state
+volatile int temporary_token_price = 0;            //The number that is adjusted
+int lastCount = -1;                   //Previous value of count (initialized to ensure it's different when the sketch starts)
+unsigned long rpt = REPEAT_FIRST;     //A variable time that is used to drive the repeats for long presses
 
 struct s_segment_data
 {
     uint8_t value;
-    uint8_t dot;
+    //uint8_t dot;
 };
 
-s_segment_data segment_data[5];
+s_segment_data segment_data[4];
 
 void set_segment_data(void* d, unsigned int val)
 {
-    int i;
-
     s_segment_data* digit = (s_segment_data*)d;
-
-    i = -1;
-    do
-    i++;
-    while( !((val -= 10000) & 0x8000) );
-    digit[4].value = i;
-
-    i = 10;
-    do
-    i--;
-    while( (val += 1000) & 0x8000 );
-    digit[3].value = i;
-
-    i = - 1;
-    do
-    i++;
-    while( !((val -= 100) & 0x8000) );
-    digit[2].value = i;
-
-    i = 10;
-    do
-    i--;
-    while( (val += 10) & 0x8000 );
-    digit[1].value = i;
-
-    digit[0].value = val;
+    digit[3].value = val/1000;
+    digit[2].value = (val%1000)/100;
+    digit[1].value = (val%100)/10;
+    digit[0].value = (val%100)%10;
 }
 
 //--- shiftOutFast - Shiftout method done in a faster way .. needed for tighter timer process
-void shiftOutFast(int myDataPin, int myClockPin, byte myDataOut) {
+void shiftOutFast(int myDataPin, int myClockPin, byte myDataOut) 
+{
     //=== This function shifts 8 bits out MSB first much faster than the normal shiftOut function by writing directly to the memory address for port
     //--- clear data pin
     dataOff();
 
     //Send each bit of the myDataOut byte MSBFIRST
-    for (int i=7; i>=0; i--)  {
+    for (int i=7; i>=0; i--)  
+    {
         clockOff();
         //--- Turn data on or off based on value of bit
-        if ( bitRead(myDataOut,i) == 1) {
+        if ( bitRead(myDataOut,i) == 1) 
             dataOn();
-        }
-        else {
+        else 
             dataOff();
-        }
+        
         //register shifts bits on upstroke of clock pin
         clockOn();
+        
         //zero the data pin after shift to prevent bleed through
         dataOff();
     }
@@ -124,61 +134,34 @@ void shiftOutFast(int myDataPin, int myClockPin, byte myDataOut) {
     digitalWrite(myClockPin, 0);
 }
 
-void dataOff(){
-    bitClear(PORTB,dataPinPORTB);
-}
-
-void clockOff(){
-    bitClear(PORTB,clockPinPORTB);
-}
-
-void clockOn(){
-    bitSet(PORTB,clockPinPORTB);
-}
-
-void dataOn(){
-    bitSet(PORTB,dataPinPORTB);
-}
-
-void latchOn(){
-    bitSet(PORTB,latchPinPORTB);
-}
-
-void latchOff(){
-    bitClear(PORTB,latchPinPORTB);
-}
-
+void dataOff() { bitClear(PORTB, dataPinPORTB);  }
+void clockOff(){ bitClear(PORTB, clockPinPORTB); }
+void clockOn() { bitSet(PORTB,clockPinPORTB);    }
+void dataOn()  { bitSet(PORTB,dataPinPORTB);     }
+void latchOn() { bitSet(PORTB,latchPinPORTB);    }
+void latchOff(){ bitClear(PORTB,latchPinPORTB);  }
    
 void draw_led()
 {
     latchOff();
     
-    uint8_t value = dec_digits[ segment_data[segment].value ];
+    uint8_t value;
+    
+    uint8_t draw_number = 1;
+    
+    if ( menu_state != MENU_WAIT && segment == 3 )
+        value = symbols[0];
+    else
+        value = dec_digits[ segment_data[segment].value ];
+        
     shiftOutFast(DATA_PIN, CLOCK_PIN, value /*& segment_data[segment].dot*/ );
     shiftOutFast(DATA_PIN, CLOCK_PIN, segments[segment]);
-
     latchOn();
-
     
     segment++;
     if ( segment == 4 )
         segment = 0;
 }
-
-void old_draw_led()
-{
-    digitalWrite(LATCH_PIN, LOW);
-    uint8_t value = dec_digits[ segment_data[segment].value ];
-    shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, value /*& segment_data[segment].dot*/ );
-    shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, segments[segment]);
-    digitalWrite(LATCH_PIN, HIGH);
-
-    
-    segment++;
-    if ( segment == 4 )
-    segment = 0;
-}
-
 
 void start()
 {
@@ -309,20 +292,28 @@ void setup()
     
     stop();
     
-    Timer1.initialize(150000/4);
+    set_segment_data(segment_data, 8888);
+    
+    Timer1.initialize(10000);
     Timer1.attachInterrupt( draw_led ); 
+    
+    temporary_token_price = price_coin_1;
+    menu_state = MENU_WAIT;
 }
 
 void loop()
 {
     unsigned long current_millis = millis();
     
-    boolean debug_output_to_console = false;
+    btn_enter.read();
+    btn_up.read();
+    btn_down.read();
+    
+    boolean endline_output_to_console = false;
     int16_t current_tokens = calculate_tokens();
     
     if ( !pump_state )
         flow_pulses = 0;
-
         
     // -- DEBUG --------------------------------------------------------------------
     if( (current_millis - previous_millis_console) >= 1000UL)
@@ -337,7 +328,7 @@ void loop()
         
         Serial.print( "Flow " ); Serial.print( flow_pulses ); Serial.print( " " );
 
-        debug_output_to_console = true;
+        endline_output_to_console = true;
     }
     
     // -- CODE --------------------------------------------------------------------
@@ -351,7 +342,6 @@ void loop()
     if ( current_tokens > 0 && (inactivity_diff > inactivity_timeout ) )
     {
         Serial.print( "inactivity_timeout\n\r" );   
-       
         stop();
     }
     
@@ -382,7 +372,7 @@ void loop()
         else
             stop();
             
-        if ( debug_output_to_console  )
+        if ( endline_output_to_console  )
         {
             Serial.print( "tokens " ); Serial.print( current_tokens ); Serial.print( " " ); 
             Serial.print( previous_millis_inactivity ); Serial.print(" ");
@@ -391,12 +381,100 @@ void loop()
         }               
     }
     
+    //set_segment_data(segment_data, xxx);
+
     
-    if ( debug_output_to_console )
+    switch( menu_state )
     {
-           
-        Serial.print( "\n\r" );   
-        
-        set_segment_data(segment_data, current_millis/1000);
-    }        
+        case MENU_WAIT:
+            if ( btn_enter.pressedFor( LONG_PRESS ) )
+            {
+                Serial.print( "Entered MENU\n\r" ); 
+                menu_state = MENU_SET_TOKENS;
+                temporary_token_price = price_coin_1;
+            }                
+            break;
+       
+       case MENU_SET_TOKENS:
+       {
+            if ( btn_enter.wasPressed() )
+            {
+                temporary_token_price = price_coin_1;
+                menu_state = MENU_SAVE;
+            }                
+                
+            switch (up_dn_state) 
+            {
+                case BUTTON_UP_DOWN_WAIT:                   //wait for a button event
+                    if (btn_up.wasPressed())
+                        up_dn_state = BUTTON_UP_DOWN_INCR;
+                    else if (btn_down.wasPressed())
+                        up_dn_state = BUTTON_UP_DOWN_DECR;
+                    else if (btn_up.wasReleased())          //reset the long press interval
+                        rpt = REPEAT_FIRST;
+                    else if (btn_down.wasReleased())
+                        rpt = REPEAT_FIRST;
+                    else if (btn_up.pressedFor(rpt))        //check for long press
+                    {     
+                        rpt += REPEAT_INCR;                 //increment the long press interval
+                        up_dn_state = BUTTON_UP_DOWN_INCR;
+                    }
+                    else if (btn_down.pressedFor(rpt)) 
+                    {
+                        rpt += REPEAT_INCR ;
+                        up_dn_state = BUTTON_UP_DOWN_DECR;
+                    }
+                    break;
+
+                case BUTTON_UP_DOWN_INCR:        
+                {
+                    int t = temporary_token_price + 1;                                                       ;
+                    temporary_token_price = min(t, MAX_COUNT);      //but not more than the specified maximum
+                    up_dn_state = BUTTON_UP_DOWN_WAIT;
+                    
+                    Serial.print( "[MENU] inc " ); 
+                    Serial.print( temporary_token_price ); 
+                    
+                    endline_output_to_console = true;
+                    break;
+                }
+                
+                case BUTTON_UP_DOWN_DECR:                               
+                {
+                    int t = temporary_token_price - 1;
+                    temporary_token_price = max(t, MIN_COUNT);      //but not less than the specified minimum
+                    up_dn_state = BUTTON_UP_DOWN_WAIT;
+                    
+                    Serial.print( "[MENU] inc " );
+                    Serial.print( temporary_token_price );
+                    
+                    endline_output_to_console = true;
+                    
+                    break;
+                }                    
+            }
+                
+            break;
+       }            
+
+       case MENU_SAVE:
+            menu_state = MENU_WAIT;
+            break;
+    }
+    
+    if ( menu_state == MENU_WAIT )
+    {
+        set_segment_data(segment_data, current_tokens);
+    }
+    else
+    {
+       set_segment_data(segment_data, temporary_token_price); 
+    }
+    
+    
+    if ( endline_output_to_console )
+    {
+        Serial.print( "\n\rMenu state: " );
+        Serial.println(menu_state);
+    }    
 }

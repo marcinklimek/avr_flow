@@ -75,6 +75,8 @@
       <Value>c:/workspace/arduino/libraries/TimerOne</Value>
       <Value>c:/workspace/arduino/libraries/PinChangeInt/utility</Value>
       <Value>c:/workspace/arduino/libraries/PinChangeInt</Value>
+      <Value>c:/workspace/arduino/libraries/Button/utility</Value>
+      <Value>c:/workspace/arduino/libraries/Button</Value>
       <Value>../../avr_flow</Value>
       <Value>c:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/eightanaloginputs</Value>
       <Value>c:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino</Value>
@@ -113,6 +115,8 @@
       <Value>c:/workspace/arduino/libraries/TimerOne</Value>
       <Value>c:/workspace/arduino/libraries/PinChangeInt/utility</Value>
       <Value>c:/workspace/arduino/libraries/PinChangeInt</Value>
+      <Value>c:/workspace/arduino/libraries/Button/utility</Value>
+      <Value>c:/workspace/arduino/libraries/Button</Value>
       <Value>../../avr_flow</Value>
       <Value>c:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/eightanaloginputs</Value>
       <Value>c:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino</Value>
@@ -336,7 +340,7 @@ vmresolved.tools.path=c:\Program Files (x86)\Arduino\hardware\tools\avr
         <arduino.upload.port>COM6</arduino.upload.port>
       </VisualMicroSettings>
     </VisualMicroSettings>
-    <VMSETTING_IncludePaths>c:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;c:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/eightanaloginputs;../../avr_flow;c:/Program Files (x86)/Arduino/libraries;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Program Files (x86)/Visual Micro/Visual Micro for Arduino/Micro Platforms/default/debuggers;c:/workspace/arduino/libraries;c:/program files (x86)/arduino/hardware/tools/avr/avr/include/;c:/program files (x86)/arduino/hardware/tools/avr/avr/include/avr/;c:/program files (x86)/arduino/hardware/tools/avr/avr/;c:/program files (x86)/arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include/;;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/utility;c:/workspace/arduino/libraries/PinChangeInt;c:/workspace/arduino/libraries/PinChangeInt/utility;c:/workspace/arduino/libraries/MQTT/src;c:/workspace/arduino/libraries/MQTT/src/utility;c:/workspace/arduino/libraries/Timer;c:/workspace/arduino/libraries/Timer/utility;c:/workspace/arduino/libraries/TimerOne;c:/workspace/arduino/libraries/TimerOne/utility;</VMSETTING_IncludePaths>
+    <VMSETTING_IncludePaths>c:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;c:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/eightanaloginputs;../../avr_flow;c:/Program Files (x86)/Arduino/libraries;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Program Files (x86)/Visual Micro/Visual Micro for Arduino/Micro Platforms/default/debuggers;c:/workspace/arduino/libraries;c:/program files (x86)/arduino/hardware/tools/avr/avr/include/;c:/program files (x86)/arduino/hardware/tools/avr/avr/include/avr/;c:/program files (x86)/arduino/hardware/tools/avr/avr/;c:/program files (x86)/arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include/;;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/utility;c:/workspace/arduino/libraries/PinChangeInt;c:/workspace/arduino/libraries/PinChangeInt/utility;c:/workspace/arduino/libraries/MQTT/src;c:/workspace/arduino/libraries/MQTT/src/utility;c:/workspace/arduino/libraries/Timer;c:/workspace/arduino/libraries/Timer/utility;c:/workspace/arduino/libraries/TimerOne;c:/workspace/arduino/libraries/TimerOne/utility;c:/workspace/arduino/libraries/Button;c:/workspace/arduino/libraries/Button/utility;</VMSETTING_IncludePaths>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
@@ -375,6 +379,8 @@ vmresolved.tools.path=c:\Program Files (x86)\Arduino\hardware\tools\avr
       <Value>c:/workspace/arduino/libraries/TimerOne</Value>
       <Value>c:/workspace/arduino/libraries/PinChangeInt/utility</Value>
       <Value>c:/workspace/arduino/libraries/PinChangeInt</Value>
+      <Value>c:/workspace/arduino/libraries/Button/utility</Value>
+      <Value>c:/workspace/arduino/libraries/Button</Value>
       <Value>../../avr_flow</Value>
       <Value>c:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/eightanaloginputs</Value>
       <Value>c:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino</Value>
@@ -413,6 +419,8 @@ vmresolved.tools.path=c:\Program Files (x86)\Arduino\hardware\tools\avr
       <Value>c:/workspace/arduino/libraries/TimerOne</Value>
       <Value>c:/workspace/arduino/libraries/PinChangeInt/utility</Value>
       <Value>c:/workspace/arduino/libraries/PinChangeInt</Value>
+      <Value>c:/workspace/arduino/libraries/Button/utility</Value>
+      <Value>c:/workspace/arduino/libraries/Button</Value>
       <Value>../../avr_flow</Value>
       <Value>c:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/eightanaloginputs</Value>
       <Value>c:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino</Value>
@@ -636,7 +644,7 @@ vmresolved.tools.path=c:\Program Files (x86)\Arduino\hardware\tools\avr
         <arduino.upload.port>COM6</arduino.upload.port>
       </VisualMicroSettings>
     </VisualMicroSettings>
-    <VMSETTING_IncludePaths>c:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;c:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/eightanaloginputs;../../avr_flow;c:/Program Files (x86)/Arduino/libraries;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Program Files (x86)/Visual Micro/Visual Micro for Arduino/Micro Platforms/default/debuggers;c:/workspace/arduino/libraries;c:/program files (x86)/arduino/hardware/tools/avr/avr/include/;c:/program files (x86)/arduino/hardware/tools/avr/avr/include/avr/;c:/program files (x86)/arduino/hardware/tools/avr/avr/;c:/program files (x86)/arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include/;;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/utility;c:/workspace/arduino/libraries/PinChangeInt;c:/workspace/arduino/libraries/PinChangeInt/utility;c:/workspace/arduino/libraries/MQTT/src;c:/workspace/arduino/libraries/MQTT/src/utility;c:/workspace/arduino/libraries/Timer;c:/workspace/arduino/libraries/Timer/utility;c:/workspace/arduino/libraries/TimerOne;c:/workspace/arduino/libraries/TimerOne/utility;</VMSETTING_IncludePaths>
+    <VMSETTING_IncludePaths>c:/Program Files (x86)/Arduino/hardware/arduino/avr/cores/arduino;c:/Program Files (x86)/Arduino/hardware/arduino/avr/variants/eightanaloginputs;../../avr_flow;c:/Program Files (x86)/Arduino/libraries;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries;C:/Program Files (x86)/Visual Micro/Visual Micro for Arduino/Micro Platforms/default/debuggers;c:/workspace/arduino/libraries;c:/program files (x86)/arduino/hardware/tools/avr/avr/include/;c:/program files (x86)/arduino/hardware/tools/avr/avr/include/avr/;c:/program files (x86)/arduino/hardware/tools/avr/avr/;c:/program files (x86)/arduino/hardware/tools/avr/lib/gcc/avr/4.8.1/include/;;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM;c:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/utility;c:/workspace/arduino/libraries/PinChangeInt;c:/workspace/arduino/libraries/PinChangeInt/utility;c:/workspace/arduino/libraries/MQTT/src;c:/workspace/arduino/libraries/MQTT/src/utility;c:/workspace/arduino/libraries/Timer;c:/workspace/arduino/libraries/Timer/utility;c:/workspace/arduino/libraries/TimerOne;c:/workspace/arduino/libraries/TimerOne/utility;c:/workspace/arduino/libraries/Button;c:/workspace/arduino/libraries/Button/utility;</VMSETTING_IncludePaths>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="avr_flow.ino">
