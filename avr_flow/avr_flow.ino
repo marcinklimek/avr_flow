@@ -1,6 +1,8 @@
 #include <PinChangeInt.h>
 #include "TimerOne/TimerOne.h"
 #include <Button.h>
+#include <EEPROMex.h>
+
 #define PULLUP true         //To keep things simple, we use the Arduino's internal pullup resistor.
 #define INVERT true         //Since the pullup resistor will keep the pin high unless the
                             //switch is closed, this is negative logic, i.e. a high state
@@ -18,13 +20,17 @@
 #define COIN_LAST (COIN_3+1)
 
 #define STOP_PIN   6
-#define PUMP_PIN   3
+#define PUMP_PIN   4 //3
 
-#define LED_PIN    2
+#define LED_PIN    3 //2
 #define LED_BLINK_OFF          0
 #define LED_BLINK_SUPER_FAST 100
 #define LED_BLINK_FAST       200
 #define LED_BLINK_NORMAL     500
+
+#define HEART_BEAT_PIN 13
+
+uint8_t hb_state = 1;
 
 #define DATA_PIN 11
 #define LATCH_PIN 10
@@ -42,7 +48,7 @@ const byte segments[] =   { 0b00001000, 0b00000100, 0b00000010, 0b00000001 };
 
 typedef void (*voidFuncPtr)(void);
 
-uint8_t price_coin_1 = 146;//117;
+volatile uint16_t price_coin_1 = 146;//117;
 
 volatile uint8_t pump_state = 0;  
 volatile int16_t flow_pulses = 0;
@@ -65,9 +71,9 @@ unsigned long previous_millis_flow = 0;
 
 /* MENU */
 #define LONG_PRESS 1000
-#define MENU_ENTER_PIN 16
-#define MENU_UP_PIN 14
-#define MENU_DOWN_PIN 15
+#define MENU_DOWN_PIN 14  
+#define MENU_ENTER_PIN 15 
+#define MENU_UP_PIN 16    
 uint8_t segment = 0;
 
 enum {MENU_WAIT = 0, MENU_SET_TOKENS, MENU_SAVE};  
@@ -81,12 +87,12 @@ Button btn_down(MENU_DOWN_PIN, PULLUP, INVERT, 20);
 #define REPEAT_FIRST 500   //ms required before repeating on long press
 #define REPEAT_INCR  100   //repeat interval for long press
 #define MIN_COUNT      1
-#define MAX_COUNT    300
+#define MAX_COUNT    999
 
 enum {BUTTON_UP_DOWN_WAIT, BUTTON_UP_DOWN_INCR, BUTTON_UP_DOWN_DECR};
     
 uint8_t up_dn_state;                  //The current state machine state
-volatile int temporary_token_price = 0;            //The number that is adjusted
+volatile uint16_t temporary_token_price = 0;            //The number that is adjusted
 int lastCount = -1;                   //Previous value of count (initialized to ensure it's different when the sketch starts)
 unsigned long rpt = REPEAT_FIRST;     //A variable time that is used to drive the repeats for long presses
 
@@ -101,10 +107,10 @@ s_segment_data segment_data[4];
 void set_segment_data(void* d, unsigned int val)
 {
     s_segment_data* digit = (s_segment_data*)d;
-    digit[3].value = val/1000;
-    digit[2].value = (val%1000)/100;
-    digit[1].value = (val%100)/10;
-    digit[0].value = (val%100)%10;
+    digit[0].value = val/1000;
+    digit[1].value = (val%1000)/100;
+    digit[2].value = (val%100)/10;
+    digit[3].value = (val%100)%10;
 }
 
 //--- shiftOutFast - Shiftout method done in a faster way .. needed for tighter timer process
@@ -147,9 +153,7 @@ void draw_led()
     
     uint8_t value;
     
-    uint8_t draw_number = 1;
-    
-    if ( menu_state != MENU_WAIT && segment == 3 )
+    if ( menu_state != MENU_WAIT && segment == 0 )
         value = symbols[0];
     else
         value = dec_digits[ segment_data[segment].value ];
@@ -271,6 +275,9 @@ void display()
 
 void setup() 
 {
+    pinMode(HEART_BEAT_PIN, OUTPUT);
+    digitalWrite(HEART_BEAT_PIN, hb_state);
+        
     Serial.begin(9600);
     Serial.println("Dystrybutor");
     
@@ -292,10 +299,11 @@ void setup()
     
     stop();
     
-    set_segment_data(segment_data, 8888);
-    
-    Timer1.initialize(10000);
+    Timer1.initialize(5000);
     Timer1.attachInterrupt( draw_led ); 
+    
+    while (!EEPROM.isReady()) { delay(1); }
+    price_coin_1 = EEPROM.readInt(0);
     
     temporary_token_price = price_coin_1;
     menu_state = MENU_WAIT;
@@ -399,8 +407,8 @@ void loop()
        {
             if ( btn_enter.wasPressed() )
             {
-                temporary_token_price = price_coin_1;
                 menu_state = MENU_SAVE;
+                
             }                
                 
             switch (up_dn_state) 
@@ -458,13 +466,20 @@ void loop()
        }            
 
        case MENU_SAVE:
+       {
             menu_state = MENU_WAIT;
+            price_coin_1 = temporary_token_price;
+    
+            while (!EEPROM.isReady()) { delay(1); }
+            EEPROM.writeInt(0, price_coin_1);
+
             break;
+       }            
     }
     
     if ( menu_state == MENU_WAIT )
     {
-        set_segment_data(segment_data, current_tokens);
+        set_segment_data(segment_data, (current_tokens - flow_pulses) );
     }
     else
     {
@@ -474,6 +489,10 @@ void loop()
     
     if ( endline_output_to_console )
     {
+        hb_state = 1 - hb_state;
+        digitalWrite(HEART_BEAT_PIN, hb_state);  
+        
+        
         Serial.print( "\n\rMenu state: " );
         Serial.println(menu_state);
     }    
