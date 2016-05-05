@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1">
+    <paths>
+        <dir name="C:/workspace/arduino/avr_flow/avr_flow"/>
+    </paths>
+    <libraries>
+        <library>avr</library>
+    </libraries>
+</project>

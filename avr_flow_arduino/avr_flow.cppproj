@@ -54,7 +54,7 @@
       <Value>__AVR_ATmega328P__</Value>
       <Value>ARDUINO=165</Value>
       <Value>ARDUINO_MAIN</Value>
-      <Value>F_CPU=8000000L</Value>
+      <Value>F_CPU=16000000L</Value>
       <Value>__AVR__</Value>
       <Value>ARDUINO_AVR_PRO</Value>
       <Value>ARDUINO_ARCH_AVR</Value>
@@ -96,7 +96,7 @@
       <Value>__AVR_ATmega328P__</Value>
       <Value>ARDUINO=165</Value>
       <Value>ARDUINO_MAIN</Value>
-      <Value>F_CPU=8000000L</Value>
+      <Value>F_CPU=16000000L</Value>
       <Value>__AVR__</Value>
       <Value>ARDUINO_AVR_PRO</Value>
       <Value>ARDUINO_ARCH_AVR</Value>
@@ -136,9 +136,9 @@
     </ToolchainSettings>
     <VisualMicroSettings>
       <VisualMicroSettings>
-        <arduino.board.name>pro_8MHzatmega328</arduino.board.name>
-        <arduino.board.desc>Arduino Pro or Pro Mini w/ ATmega328 (3.3V, 8 MHz)</arduino.board.desc>
-        <arduino.board.property_bag>name=Arduino Pro or Pro Mini w/ ATmega328 (3.3V, 8 MHz)
+        <arduino.board.name>pro_16MHzatmega328</arduino.board.name>
+        <arduino.board.desc>Arduino Pro or Pro Mini w/ ATmega328 (5V, 16 MHz)</arduino.board.desc>
+        <arduino.board.property_bag>name=Arduino Pro or Pro Mini w/ ATmega328 (5V, 16 MHz)
 upload.tool=avrdude
 upload.protocol=arduino
 bootloader.tool=avrdude
@@ -270,9 +270,9 @@ upload.speed=57600
 bootloader.low_fuses=0xFF
 bootloader.high_fuses=0xDA
 bootloader.extended_fuses=0x05
-bootloader.file=atmega/ATmegaBOOT_168_atmega328_pro_8MHz.hex
+bootloader.file=atmega/ATmegaBOOT_168_atmega328.hex
 build.mcu=atmega328p
-build.f_cpu=8000000L
+build.f_cpu=16000000L
 ide.hint=Arduino 1.5 Ide also works with 1.6
 ide.location.key=Arduino15x
 ide.location.ide.winreg=Arduino 1.5.x Application
@@ -314,7 +314,7 @@ vm.platformname.name=avr
 build.arch=AVR
 </arduino.board.property_bag>
         <arduino.build.mcu>atmega328p</arduino.build.mcu>
-        <arduino.build.f_cpu>8000000L</arduino.build.f_cpu>
+        <arduino.build.f_cpu>16000000L</arduino.build.f_cpu>
         <arduino.build.core>arduino</arduino.build.core>
         <arduino.upload.protocol>arduino</arduino.upload.protocol>
         <arduino.upload.speed>57600</arduino.upload.speed>
@@ -343,7 +343,7 @@ build.arch=AVR
       <Value>__AVR_ATmega328P__</Value>
       <Value>ARDUINO=165</Value>
       <Value>ARDUINO_MAIN</Value>
-      <Value>F_CPU=8000000L</Value>
+      <Value>F_CPU=16000000L</Value>
       <Value>__AVR__</Value>
       <Value>ARDUINO_AVR_PRO</Value>
       <Value>ARDUINO_ARCH_AVR</Value>
@@ -385,7 +385,7 @@ build.arch=AVR
       <Value>__AVR_ATmega328P__</Value>
       <Value>ARDUINO=165</Value>
       <Value>ARDUINO_MAIN</Value>
-      <Value>F_CPU=8000000L</Value>
+      <Value>F_CPU=16000000L</Value>
       <Value>__AVR__</Value>
       <Value>ARDUINO_AVR_PRO</Value>
       <Value>ARDUINO_ARCH_AVR</Value>
@@ -425,9 +425,9 @@ build.arch=AVR
     </ToolchainSettings>
     <VisualMicroSettings>
       <VisualMicroSettings>
-        <arduino.board.name>pro_8MHzatmega328</arduino.board.name>
-        <arduino.board.desc>Arduino Pro or Pro Mini w/ ATmega328 (3.3V, 8 MHz)</arduino.board.desc>
-        <arduino.board.property_bag>name=Arduino Pro or Pro Mini w/ ATmega328 (3.3V, 8 MHz)
+        <arduino.board.name>pro_16MHzatmega328</arduino.board.name>
+        <arduino.board.desc>Arduino Pro or Pro Mini w/ ATmega328 (5V, 16 MHz)</arduino.board.desc>
+        <arduino.board.property_bag>name=Arduino Pro or Pro Mini w/ ATmega328 (5V, 16 MHz)
 upload.tool=avrdude
 upload.protocol=arduino
 bootloader.tool=avrdude
@@ -559,9 +559,9 @@ upload.speed=57600
 bootloader.low_fuses=0xFF
 bootloader.high_fuses=0xDA
 bootloader.extended_fuses=0x05
-bootloader.file=atmega/ATmegaBOOT_168_atmega328_pro_8MHz.hex
+bootloader.file=atmega/ATmegaBOOT_168_atmega328.hex
 build.mcu=atmega328p
-build.f_cpu=8000000L
+build.f_cpu=16000000L
 ide.hint=Arduino 1.5 Ide also works with 1.6
 ide.location.key=Arduino15x
 ide.location.ide.winreg=Arduino 1.5.x Application
@@ -603,7 +603,7 @@ vm.platformname.name=avr
 build.arch=AVR
 </arduino.board.property_bag>
         <arduino.build.mcu>atmega328p</arduino.build.mcu>
-        <arduino.build.f_cpu>8000000L</arduino.build.f_cpu>
+        <arduino.build.f_cpu>16000000L</arduino.build.f_cpu>
         <arduino.build.core>arduino</arduino.build.core>
         <arduino.upload.protocol>arduino</arduino.upload.protocol>
         <arduino.upload.speed>57600</arduino.upload.speed>
