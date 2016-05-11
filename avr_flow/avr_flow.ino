@@ -28,6 +28,8 @@ HC595
 
 #define INACTIVITY_TIMEOUT 120
 
+#define BUZZER_PIN 1
+
 #define FLOW_SENSOR_PIN 16
 #define PUMP_PIN   9
 #define STOP_PIN   15
@@ -106,6 +108,16 @@ enum {MENU_WAIT, MENU_SET_TOKENS, MENU_STAT, MENU_SAVE};
 uint8_t prev_menu_state = MENU_WAIT;
 uint8_t menu_state = MENU_WAIT;
 
+#define REPEAT_FIRST 500   //ms required before repeating on long press
+#define REPEAT_NEXT   40   //repeat interval for long press
+uint32_t updn_press_start = 0;
+uint32_t rpt = REPEAT_FIRST;
+
+uint8_t buzzer_state;
+uint32_t buzzer_time_start;
+uint32_t buzzer_time_current;
+uint32_t buzzer_time_end;
+
 
 void set_segment_data(uint8_t* digit, int16_t val)
 {
@@ -170,11 +182,24 @@ void set_input_pins()
 }
 
 
+void set_buzzer(uint8_t value)
+{
+    buzzer_time_start = millis();
+    buzzer_time_end = buzzer_time_start+100+value*16;
+    buzzer_state = 1;
+}
 
-#define REPEAT_FIRST 500   //ms required before repeating on long press
-#define REPEAT_NEXT   40   //repeat interval for long press
-uint32_t updn_press_start = 0;
-uint32_t rpt = REPEAT_FIRST;
+
+void check_buzzer(uint32_t time)
+{
+    if (time > buzzer_time_start && time < buzzer_time_end)
+    if (time - buzzer_time_current > 1)
+    {
+        buzzer_time_current = time;
+        digitalWrite(BUZZER_PIN, buzzer_state);
+        buzzer_state = 1-buzzer_state;
+    }
+}
 
 uint8_t check_updn_buttons(unsigned long t)
 {
@@ -255,6 +280,8 @@ void start()
     previous_millis_console= 0;
     previous_millis_tokens= 0;
     previous_millis_inactivity = millis();
+    
+
 }
 
 void stop()
@@ -344,7 +371,9 @@ void callback_coinPin()
             {
                 coins_counter[0]++;
                 cumulative_number_coins += 1;
-            }                
+                set_buzzer(0);
+            }       
+                     
             break;
         }
         case COIN_2_PIN:
@@ -353,6 +382,7 @@ void callback_coinPin()
             {            
                 coins_counter[1]++;
                 cumulative_number_coins += 2;
+                set_buzzer(1);
             }            
             break;
         }
@@ -362,6 +392,7 @@ void callback_coinPin()
             {
                 coins_counter[2]++;
                 cumulative_number_coins += 5;
+                set_buzzer(2);
             }            
             break;
         }
@@ -400,6 +431,8 @@ void setup()
     reset_stat = 0;
     //Serial.begin(9600);
     //Serial.println("start");
+    
+    pinMode(BUZZER_PIN, OUTPUT);
     
     pinMode(LATCH_PIN, OUTPUT);
     pinMode(CLOCK_PIN, OUTPUT);
@@ -443,6 +476,8 @@ void setup()
     set_segment_data(segment_data, counter);
     
     stop();
+    
+    set_buzzer(10);
 }
 
 void process_menu(int16_t current_tokens)
@@ -545,6 +580,7 @@ void loop()
     
     process_menu(current_tokens);
     blinker(t);
+    check_buzzer(t);
     
     
     //if ( t - previous_millis_console > 1000 )
